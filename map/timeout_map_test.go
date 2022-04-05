@@ -1,4 +1,4 @@
-package amap
+package m
 
 import (
 	"log"
@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-func TestAmap(t *testing.T) {
+func TestMap(t *testing.T) {
 	t.Run("set/get", func(t *testing.T) {
-		m := AMap{Map: &sync.Map{}, listeners: map[string]map[int64]Listener{}}
+		var m Map
 		m.Set("k1", "v1")
 		v := m.Get("k1", 0)
 		if v != "v1" {
@@ -18,7 +18,7 @@ func TestAmap(t *testing.T) {
 	})
 
 	t.Run("set/get with timeout", func(t *testing.T) {
-		m := AMap{Map: &sync.Map{}, listeners: map[string]map[int64]Listener{}}
+		var m Map
 		start := time.Now()
 		v := m.Get("k1", time.Second*1)
 		end := time.Now()
@@ -32,7 +32,7 @@ func TestAmap(t *testing.T) {
 	})
 
 	t.Run("set/get with value and timeout", func(t *testing.T) {
-		m := AMap{Map: &sync.Map{}, listeners: map[string]map[int64]Listener{}}
+		var m Map
 		var v interface{}
 
 		go func() {
@@ -54,5 +54,38 @@ func TestAmap(t *testing.T) {
 		if v != "v1" {
 			t.Fatalf("should get %v but got %s", "v1", v)
 		}
+	})
+	t.Run("map", func(t *testing.T) {
+		var m sync.Map
+		m.Load("a")
+	})
+
+	t.Run("thread safe", func(t *testing.T) {
+		var m Map
+
+		go func() {
+			for {
+				m.Set("key1", "val1")
+			}
+		}()
+
+		go func() {
+			for {
+				m.Set("key1", "val2")
+			}
+		}()
+
+		go func() {
+			for {
+				m.Set("notfound", "val2")
+			}
+		}()
+
+		go func() {
+			for {
+				_ = m.Get("notfound", time.Second*1)
+			}
+		}()
+		time.Sleep(2 * time.Second)
 	})
 }

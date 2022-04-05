@@ -1,3 +1,3 @@
-# AMap 
+# go-ext
 
-A map with read waiting and timeout.
+some extensions for go buit-in types.

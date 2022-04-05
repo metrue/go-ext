@@ -1,3 +1,3 @@
-module github.com/metrue/amap
+module github.com/metrue/go-ext
 
 go 1.18
